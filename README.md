@@ -1,6 +1,7 @@
 # Card data for Marvel Dice Masters™
 
 This module scrapes the web for the collectible dice game's card images.
+
 It is powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
 ```javascript
@@ -27,4 +28,5 @@ Will output:
 ```
 
 Keep in mind that making requests to a Wordpress site is slow.
+
 It will have to do until someone provides a proper API. (｡･ω･｡)
