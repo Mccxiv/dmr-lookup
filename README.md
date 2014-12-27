@@ -2,14 +2,14 @@
 
 This module scrapes the web for the collectible dice game's card images.
 
-It is powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
+It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
 ```
-npm install mccxiv/dmr-lookup --save
+npm install mccxiv/dm-lookup --save
 ```
 
 ```
-var dmr = require('dmr-lookup');
+var dmr = require('dm-lookup');
 
 dmr.search('orm', console.log);
 ```
