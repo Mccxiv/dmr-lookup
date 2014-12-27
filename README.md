@@ -4,12 +4,16 @@ This module scrapes the web for the collectible dice game's card images.
 
 It is powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
-```javascript
+```
+npm install mccxiv/dmr-lookup --save
+```
+
+```
 var dmr = require('dmr-lookup');
 
 dmr.search('orm', console.log);
-
 ```
+
 Will output:
 
 ```
