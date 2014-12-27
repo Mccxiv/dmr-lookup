@@ -14,7 +14,7 @@ function search(query, callback)
 
 function getLinks(obj)
 {
-	// TODO should be refactored
+	// TODO can be refactored
 	var urlRoot = 'http://www.dicemastersrules.com/advanced-search/';
 	var deferred = q.defer();
 	var links = [];
