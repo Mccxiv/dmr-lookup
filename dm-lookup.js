@@ -7,9 +7,17 @@ var q = require('q');
 
 function search(query, callback)
 {
+	var d = q.defer();
 	var title = {title: query};
 	var subtitle = {subtitle: query};
-	q.all([getLinks(title), getLinks(subtitle)]).then(mergeLinks).then(fetchLinks).then(parseResultsToCards).done(callback);
+	q.all([getLinks(title), getLinks(subtitle)]).then(mergeLinks).then(fetchLinks).then(parseResultsToCards).done(finished);
+	return d.promise;
+
+	function finished(result)
+	{
+		if (callback) callback(result);
+		d.resolve(result);
+	}
 }
 
 function getLinks(obj)
@@ -76,8 +84,17 @@ function parsePageIntoCard(html)
 	var card = {};
 	var $ = cheerio.load(html);
 	card.image = $('.attachment-full').attr('src');
-	card.title = $('title').text().split(' |')[0]; // quite frail
+	card.name = $('title').text().split(' |')[0]; // quite frail
 	return card;
 }
 
-module.exports = {search: search};
+module.exports = {
+	search: search,
+	privates: {
+		getLinks: getLinks,
+		mergeLinks: mergeLinks,
+		fetchLinks: fetchLinks,
+		parseResultsToCards: parseResultsToCards,
+		parsePageIntoCard: parsePageIntoCard
+	}
+};
