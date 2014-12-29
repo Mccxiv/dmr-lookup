@@ -21,17 +21,14 @@ describe('dm-lookup search method', function()
 			assert.isFunction(promise.then, 'the then property is a function');
 		});
 
-		it('should return only valid cards', function(done)
+		it('return value should not be empty', function()
 		{
-			promise.then(function(cards)
-			{
-				try
-				{
-					validateCards(cards);
-					done();
-				}
-				catch(e) {done(e);}
-			});
+			return promise.should.eventually.not.be.empty;
+		});
+
+		it('the returned cards should be valid', function()
+		{
+			return promise.then(validateCards);
 		});
 	});
 
@@ -39,12 +36,13 @@ describe('dm-lookup search method', function()
 	{
 		this.timeout('60000');
 
-		it('should contain only valid cards', function(done)
+		it('should not be empty and should contain only valid cards', function(done)
 		{
 			dm.search('orm', function(cards)
 			{
 				try
 				{
+					assert(cards.length, 'cards array should not be empty');
 					validateCards(cards);
 					done();
 				}

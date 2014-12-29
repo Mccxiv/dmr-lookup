@@ -29,15 +29,15 @@ function getLinks(obj)
 	var searchType;
 	var searchQuery;
 
-	if (obj['title'])
+	if (obj.title)
 	{
 		searchType ='card-title';
-		searchQuery = obj['title'];
+		searchQuery = obj.title;
 	}
-	else if (obj['subtitle'])
+	else if (obj.subtitle)
 	{
 		searchType = 'card-subtitle';
-		searchQuery = obj['subtitle'];
+		searchQuery = obj.subtitle;
 	}
 	else deferred.resolve(links);
 
@@ -69,7 +69,7 @@ function fetchLinks(links)
 {
 	var d = q.defer();
 	var fetchedPromises = [];
-	_(links).each(function(link) {fetchedPromises.push(request(link))});
+	_(links).each(function(link) {fetchedPromises.push(request(link));});
 	q.all(fetchedPromises).then(d.resolve);
 	return d.promise;
 }
