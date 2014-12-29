@@ -1,20 +1,21 @@
+
 # Card data for Marvel Dice Masters™
 
-This module scrapes the web for the collectible dice game's card images.
+This module scrapes the web for the collectible dice game's card images. It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
-It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
-
+### Installation
 ```
 npm install mccxiv/dm-lookup --save
 ```
 
+### Usage
 ```
 var dmr = require('dm-lookup');
 
 dmr.search('orm', console.log);
 ```
 
-Will output:
+...will output:
 
 ```
 [ { image: 'http://www.dicemaster...estess.png', name: 'Storm – African Priestess' },
@@ -31,6 +32,13 @@ Will output:
   { image: 'http://www.dicemaster...on-Ten.png', name: 'Wolverine – Formerly Weapon Ten' } ]
 ```
 
-Keep in mind that making requests to a Wordpress site is slow.
+### Running tests
+```
+npm run test
+```
 
-It will have to do until someone provides a proper API. (｡･ω･｡)
+---
+
+### Considerations
+Making multiple requests to a Wordpress site is slow.
+ It will have to do until someone provides a proper API. (｡･ω･｡)
