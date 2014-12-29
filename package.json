@@ -1,12 +1,34 @@
 {
   "name": "dm-lookup",
   "version": "0.0.2",
+  "description": "scrapes the web to obtain card images for Marvel Dice Masters™",
+  "main": "dm-lookup.js",
+
+  "author": {
+    "name": "Andrea Stella",
+    "email": "adr.stella@gmail.com"
+  },
+
+  "keywords": [
+    "dicemastersrules",
+    "dicemaster",
+    "marvel",
+    "cards",
+    "tcg"
+  ],
+
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mccxiv/dm-lookup"
+  },
+
   "dependencies": {
     "cheerio": "0.18.0",
     "q": "1.1.2",
     "request-promise": "0.3.2",
     "underscore": "1.7.0"
   },
+
   "devDependencies": {
     "chai": "~1.10.0",
     "chai-as-promised": "~4.1.1",
@@ -14,10 +36,12 @@
     "mocha": "~2.1.0",
     "validator": "~3.26.0"
   },
+
   "scripts": {
     "test": "mocha test/",
     "lint": "jshint dm-lookup.js"
   },
+
   "jshintConfig": {
     "node": true
   }
