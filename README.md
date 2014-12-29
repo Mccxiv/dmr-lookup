@@ -10,9 +10,9 @@ npm install mccxiv/dm-lookup --save
 
 ### Usage
 ```
-var dmr = require('dm-lookup');
+var dm = require('dm-lookup');
 
-dmr.search('orm', console.log);
+dm.search('orm', console.log);
 ```
 
 ...will output:
