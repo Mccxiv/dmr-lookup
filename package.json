@@ -1,6 +1,6 @@
 {
   "name": "dm-lookup",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "scrapes the web to obtain card images for Marvel Dice Masters™",
   "main": "dm-lookup.js",
 
