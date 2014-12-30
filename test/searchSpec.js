@@ -8,7 +8,7 @@ var dm = require("../dm-lookup.js");
 chai.use(chaiAsPromised);
 chai.should();
 
-describe('dm-lookup search method', function()
+describe('Public search method', function()
 {
 	describe('search() as a promise', function()
 	{

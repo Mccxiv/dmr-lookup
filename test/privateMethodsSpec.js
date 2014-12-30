@@ -7,7 +7,7 @@ var dm = require("../dm-lookup.js");
 chai.use(chaiAsPromised);
 chai.should();
 
-describe('dm-lookup Private methods', function()
+describe('Private methods', function()
 {
 	describe('getLinks()', function()
 	{
@@ -67,14 +67,14 @@ describe('dm-lookup Private methods', function()
 		});
 	});
 
-	describe('parseResultsToCards()', function()
+	describe('parsePagesToCards()', function()
 	{
 		this.timeout('60000');
 		var links = ["http://www.dicemastersrules.com/card/storm-african-priestess/", "http://www.dicemastersrules.com/card/storm-goddess-of-the-plains/"];
 
 		it('should parse html strings into cards with image and name properties', function()
 		{
-			return dm.privates.fetchLinks(links).then(dm.privates.parseResultsToCards).should.eventually.deep.include.members([
+			return dm.privates.fetchLinks(links).then(dm.privates.parsePagesToCards).should.eventually.deep.include.members([
 			{
 				image: 'http://www.dicemastersrules.com/wp-content/uploads/2014/05/019-African-Priestess.png',
 				name: 'Storm – African Priestess'
