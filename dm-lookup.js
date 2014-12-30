@@ -13,7 +13,7 @@ var q = require('q');
  *
  * @public
  * @param {string} query - What to search for, in either name or subtype
- * @param {function} callback - Will be passed an array of card objects
+ * @param {function} [callback] - Will be passed an array of card objects
  * @returns {request.Request.promise|promise|Q.promise} - Promises an array of card objects
  */
 function search(query, callback)
