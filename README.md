@@ -5,7 +5,7 @@ This module scrapes the web for the collectible dice game's card images. It is c
 
 ### Installation
 ```
-npm install mccxiv/dm-lookup --save
+npm install dm-lookup --save
 ```
 
 ### Usage
@@ -33,7 +33,11 @@ dm.search('orm', console.log);
 ```
 
 ### Running tests
+
+Clone the repository from github, then:
+
 ```
+npm install
 npm run test
 ```
 
