@@ -18,7 +18,7 @@ search.on('list', console.log); // quick list, the cards lack some fields like i
 search.on('card', console.log); // full card info, fires for each result
 search.on('done', console.log); // complete list of full cards, slow!
 
-// need to start a new search? no problem, let's cancel the current one
+// need to start a new search? no problem
 search.abort()
 ```
 
