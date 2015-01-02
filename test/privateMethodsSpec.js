@@ -75,14 +75,14 @@ describe('Private methods', function()
 		it('should parse html strings into cards with image and name properties', function()
 		{
 			return dm.privates.fetchLinks(links).then(dm.privates.parsePagesToCards).should.eventually.deep.include.members([
-			{
-				image: 'http://www.dicemastersrules.com/wp-content/uploads/2014/05/019-African-Priestess.png',
-				name: 'Storm – African Priestess'
-			},
-			{
-				image: 'http://www.dicemastersrules.com/wp-content/uploads/2014/05/020-Godess-of-the-Plains.png',
-				name: 'Storm – Goddess of the Plains'
-			}]);
+				{
+					image: 'http://www.dicemastersrules.com/wp-content/uploads/2014/05/019-African-Priestess.png',
+					name: 'Storm – African Priestess'
+				},
+				{
+					image: 'http://www.dicemastersrules.com/wp-content/uploads/2014/05/020-Godess-of-the-Plains.png',
+					name: 'Storm – Goddess of the Plains'
+				}]);
 		});
 	});
 });

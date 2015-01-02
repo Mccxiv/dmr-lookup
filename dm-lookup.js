@@ -1,149 +1,201 @@
 'use strict';
 
-var request = require('request-promise');
+var EventEmitter = require('events').EventEmitter;
+var request = require('request');
 var cheerio = require('cheerio');
 var _ = require('underscore');
 var q = require('q');
 
 /**
- * Returns an array of cards in this format:
- * [{name: "Card Name - Subtype", image: "url-to-img"}]
+ * Returns an event emitting object.
+ * Eventually provides a 'simple' card list, followed by each complete card as they become available.
+ * The cards in the 'simple' list lack the image, rarity and maxDice fields.
+ * Wait until the complete card comes in to obtain the image.
  *
- * Works either as a promise (q) or via callback
+ * @example
+ * var search = dm.search('storm');
+ *
+ * // fires once, always before cards
+ * search.on('list', console.log);
+ *
+ * // fires once for each card in the search results
+ * search.on('card', console.log);
  *
  * @public
- * @param {string} query - What to search for, in either name or subtype
- * @param {function} [callback] - Will be passed an array of card objects
- * @returns {request.Request.promise|promise|Q.promise} - Promises an array of card objects
+ * @param {string} query - What to search for in the title, subtitle, and card text.
+ * @fires list - Provides a list of all cards in the search results, in 'simple' form.
+ * @fires card - Provides a single complete card from the search results.
+ * @returns {EventEmitter}
  */
-function search(query, callback)
+function search(query)
 {
-	var d = q.defer();
-	var title = {title: query};
-	var subtitle = {subtitle: query};
-	q.all([getLinks(title), getLinks(subtitle)]).then(mergeLinks).then(fetchLinks).then(parsePagesToCards).done(finished);
-	return d.promise;
+	var emitter = new EventEmitter();
+	var cards = [];
+	var list;
 
-	function finished(result)
+	fetchList(createSearchParams(query)).then(emitList).then(fetchAndEmitCards);
+
+	function emitList(cardList)
 	{
-		if (callback) callback(result);
-		d.resolve(result);
+		list = cardList;
+		emitter.emit('list', cardList);
+		return cardList;
 	}
+
+	function fetchAndEmitCards(cardList)
+	{
+		_(cardList).each(fetchAndEmitCard);
+	}
+
+	function fetchAndEmitCard(simpleCard)
+	{
+		fetchCard(simpleCard).then(emitCard);
+	}
+
+	function emitCard(card)
+	{
+		cards.push(card);
+		emitter.emit('card', card);
+		if (cards.length === list.length) emitter.emit('done', cards);
+	}
+
+	return emitter;
 }
 
 /**
- * Takes a query object and returns a promise
- * for an array of urls to matching cards.
+ * Eventually returns an array of 'simple' cards.
+ * 'Simple' cards lack the image, rarity and maxDice fields.
  *
  * @private
- * @param {Object} obj - Either {title: <query>} or {subtitle: <query>}
- * @returns {request.Request.promise|promise|Q.promise}
+ * @param {{type: string, query: string}} query
+ * @returns {promise} - Eventually an array of 'simple' cards.
  */
-function getLinks(obj)
+function fetchList(query)
 {
-	// TODO can be refactored
+	var input = query;
 	var urlRoot = 'http://www.dicemastersrules.com/advanced-search/';
 	var deferred = q.defer();
-	var links = [];
-	var searchType;
-	var searchQuery;
+	var cards = [];
 
-	if (obj.title)
+	if (input.query)
 	{
-		searchType ='card-title';
-		searchQuery = obj.title;
-	}
-	else if (obj.subtitle)
-	{
-		searchType = 'card-subtitle';
-		searchQuery = obj.subtitle;
-	}
-	else deferred.resolve(links);
-
-	if (searchType)
-	{
-		var url = urlRoot+'?'+searchType+'='+encodeURIComponent(searchQuery);
+		var url = urlRoot+'?'+input.type+'='+encodeURIComponent(input.query);
 		request(url, function(error, response, body)
 		{
-			if (!error)
-			{
-				var $ = cheerio.load(body);
-				var anchors = $('.table-condensed td:nth-child(7) a');
-				anchors.each(function() {links.push($(this).attr('href'));});
-			}
-			deferred.resolve(links);
+			if (!error) cards = parseHtmlToCards(body);
+			deferred.resolve(cards);
 		});
 	}
+	else deferred.resolve(cards);
 
 	return deferred.promise;
 }
 
 /**
- * Merge arrays and remove duplicates
- * Takes [[1, 2, 3], [3, 4]] and returns [1, 2, 3, 4]
+ * Uses a 'simple' card's url property to fetch and parse it into a complete card
  *
  * @private
- * @param {Array[]} arrayOfArrays - An array containing two arrays to be merged
- * @returns {string[]} - A single merged array, no duplicates
+ * @param {object} simpleCard
+ * @returns {promise} - Eventually returns a complete card
  */
-function mergeLinks(arrayOfArrays)
+function fetchCard(simpleCard)
 {
-	var links = arrayOfArrays[0].concat(arrayOfArrays[1]);
-	return _(links).uniq();
+	var deferred = q.defer();
+	if (!simpleCard || !simpleCard.url) fail('Invalid arguments to fetchCard');
+	request(simpleCard.url, function(error, response, body)
+	{
+		if (!error)
+		{
+			var card = _(simpleCard).extend(parseHtmlToCard(body));
+			deferred.resolve(card);
+		}
+		else fail('Request failed in fetchCard');
+	});
+	return deferred.promise;
+	function fail(msg) {deferred.reject(new Error(msg));}
 }
 
 /**
- * Turns an array of urls into an array of html strings
+ * Takes the html from a search and turns it into 'simple' cards.
+ * 'Simple' cards lack the image, rarity and maxDice fields.
  *
  * @private
- * @param {string[]} links - Array of urls
- * @returns {request.Request.promise|promise|Q.promise}
+ * @param {string} searchResultsHtml
+ * @returns {Array} - An Array of 'simple' cards
  */
-function fetchLinks(links)
+function parseHtmlToCards(searchResultsHtml)
 {
-	var d = q.defer();
-	var fetchedPromises = [];
-	_(links).each(function(link) {fetchedPromises.push(request(link));});
-	q.all(fetchedPromises).then(d.resolve);
-	return d.promise;
+	var cards = [];
+	var $ = cheerio.load(searchResultsHtml);
+	var tableRows = $('.table-condensed tbody tr');
+	tableRows.each(function()
+	{
+		var el = $(this);
+		var card = {};
+		card.set = 			el.find('td:nth-child(1)').text();
+		card.number = 		el.find('td:nth-child(2)').text();
+		card.energy = 		el.find('td:nth-child(3)').text();
+		card.affiliation = 	el.find('td:nth-child(4)').text();
+		card.cost = 		el.find('td:nth-child(5)').text();
+		card.title = 		el.find('td:nth-child(6)').text();
+		card.subtitle =		el.find('td:nth-child(7)').text();
+		card.url = 			el.find('td:nth-child(7) a').attr('href');
+		card.name = 		card.title + ' - ' + card.subtitle;
+		cards.push(card);
+	});
+	return cards;
 }
 
 /**
- * Turns an array of html strings into an array of card objects
+ * Takes html from a specific card's page and returns a card fragment
+ * These are the missing bits that a 'simple' card needs to become a complete card
  *
  * @private
- * @param pages {string[]} - An array of html pages as strings
- * @returns {Object[]} - An array of card objects
+ * @param {string} cardPageHtml
+ * @returns {{image: string, rarity: string, maxDice: string|number}}
  */
-function parsePagesToCards(pages)
+function parseHtmlToCard(cardPageHtml)
 {
-	return _(pages).map(parsePageIntoCard);
+	var $ = cheerio.load(cardPageHtml);
+	var table = $('.table-condensed');
+	return {
+		image: $('.attachment-full').attr('src'),
+		rarity: table.find('tr:nth-child(3) td:nth-child(2)').text(),
+		maxDice: table.find('tr:nth-child(7) td:nth-child(2)').text()
+	};
 }
-
 
 /**
- * Parses an html string into a card object
+ * Helper function
+ * Converts the public API input into a format that works for the scraping function.
  *
  * @private
- * @param html {string} - An html page as a string
- * @returns {Object} - A card object
+ * @param {string | {title: string} | {subtitle: string} | {all: string}} searchInput
+ * @return {{type: string, query: string}}
  */
-function parsePageIntoCard(html)
+function createSearchParams(searchInput)
 {
-	var card = {};
-	var $ = cheerio.load(html);
-	card.image = $('.attachment-full').attr('src');
-	card.name = $('title').text().split(' |')[0]; // quite frail
-	return card;
-}
+	var input = {type: 'wpv_post_search', query: ''};
 
-module.exports = {
-	search: search,
-	privates: {
-		getLinks: getLinks,
-		mergeLinks: mergeLinks,
-		fetchLinks: fetchLinks,
-		parsePagesToCards: parsePagesToCards,
-		parsePageIntoCard: parsePageIntoCard
+	if (typeof searchInput === 'object')
+	{
+		if (isString(searchInput.title))
+		{
+			input.type ='card-title';
+			input.query = searchInput.title;
+		}
+		else if (isString(searchInput.subtitle))
+		{
+			input.type = 'card-subtitle';
+			input.query = searchInput.subtitle;
+		}
+		else if (isString(searchInput.all)) input.query = searchInput.all;
 	}
-};
+	else if (isString(searchInput)) input.query = searchInput;
+
+	return input;
+
+	function isString(thing) {return typeof thing === 'string';}
+}
+
+module.exports = {search: search};

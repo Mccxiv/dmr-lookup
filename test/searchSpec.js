@@ -8,57 +8,92 @@ var dm = require("../dm-lookup.js");
 chai.use(chaiAsPromised);
 chai.should();
 
-describe('Public search method', function()
+describe('Public methods', function()
 {
-	describe('search() as a promise', function()
+	describe('search("storm")', function ()
 	{
-		this.timeout('60000');
-		var promise = dm.search('orm');
+		this.timeout('30000');
 
-		it('should look like a promise', function()
+		it('The "list" event should return a non empty array', function(done)
 		{
-			assert.isDefined(promise.then, 'has a then property');
-			assert.isFunction(promise.then, 'the then property is a function');
-		});
+			var search = dm.search('storm');
 
-		it('return value should not be empty', function()
-		{
-			return promise.should.eventually.not.be.empty;
-		});
-
-		it('the returned cards should be valid', function()
-		{
-			return promise.then(validateCards);
-		});
-	});
-
-	describe('search() via callback', function()
-	{
-		this.timeout('60000');
-
-		it('should not be empty and should contain only valid cards', function(done)
-		{
-			dm.search('orm', function(cards)
+			search.once('list', function(simpleCards)
 			{
 				try
 				{
-					assert(cards.length, 'cards array should not be empty');
-					validateCards(cards);
+					assert.isArray(simpleCards);
+					assert(simpleCards.length > 0);
 					done();
 				}
-				catch(e) {done(e);}
+				catch (e) {done(e)}
+			});
+		});
+
+		it('The "card" event should return a valid card', function(done)
+		{
+			var search = dm.search('storm');
+
+			search.once('card', function(card)
+			{
+				try
+				{
+					validateCard(card);
+					done();
+				}
+				catch (e) {done(e)}
+			});
+		});
+
+		it('should fire "list" 1 time', function(done)
+		{
+			var search = dm.search('storm');
+			var listCallCounter = 0;
+			search.on('list', function() {listCallCounter++;});
+
+			search.on('done', function()
+			{
+				try
+				{
+					assert.strictEqual(listCallCounter, 1);
+					done();
+				}
+				catch (e) {done(e)}
+			});
+		});
+
+		it('should fire "card" 8 times', function(done)
+		{
+			var search = dm.search('storm');
+			var cardCallCounter = 0;
+			search.on('card', function() {cardCallCounter++;});
+
+			search.on('done', function()
+			{
+				try
+				{
+					assert.strictEqual(cardCallCounter, 8);
+					done();
+				}
+				catch (e) {done(e)}
 			});
 		});
 	});
 });
 
-function validateCards(cards)
+function validateCard(card)
 {
-	cards.forEach(function(card)
-	{
-		assert.ok(card, 'card should be ok');
-		assert.ok(card.name, 'card name should be ok');
-		assert.ok(card.image, 'card image should be ok');
-		assert(validator.isURL(card.image), 'image is url');
-	});
+	assert.ok(card);
+	assert.ok(card.name);
+	assert.ok(card.set);
+	assert.ok(card.number);
+	assert.ok(card.energy);
+	assert.ok(card.affiliation);
+	assert.ok(card.cost);
+	assert.ok(card.title);
+	assert.ok(card.subtitle);
+	assert.ok(validator.isURL(card.url));
+	assert.ok(validator.isURL(card.image));
+	assert.ok(card.rarity);
+	assert.ok(card.maxDice);
 }
