@@ -175,6 +175,7 @@ function parseHtmlToCard(cardPageHtml)
  */
 function createSearchParams(searchInput)
 {
+	if (!searchInput) throw new Error('Invalid search terms');
 	var input = {type: 'wpv_post_search', query: ''};
 
 	if (typeof searchInput === 'object')

@@ -10,6 +10,21 @@ chai.should();
 
 describe('Public methods', function()
 {
+	describe('input tests', function()
+	{
+		this.timeout('30000');
+
+		it('should throw error when passed null', function()
+		{
+			assert.throws(function() {dm.search(null);}, 'Invalid search terms');
+		});
+
+		it('should throw error when passed nothing', function()
+		{
+			assert.throws(function() {dm.search();}, 'Invalid search terms');
+		});
+	});
+
 	describe('search("storm")', function ()
 	{
 		this.timeout('30000');
