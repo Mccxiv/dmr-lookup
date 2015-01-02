@@ -30,10 +30,15 @@ var q = require('q');
 function search(query)
 {
 	var emitter = new EventEmitter();
+	var requests = []; // saving the requests to be able to abort them if needed.
 	var cards = [];
+	var aborted = false;
 	var list;
 
-	fetchList(createSearchParams(query)).then(emitList).then(fetchAndEmitCards);
+	var listPromise = fetchList(createSearchParams(query));
+	listPromise.then(emitList).then(fetchAndEmitCards);
+
+	if (listPromise.request) requests.push(listPromise.request);
 
 	function emitList(cardList)
 	{
@@ -44,12 +49,15 @@ function search(query)
 
 	function fetchAndEmitCards(cardList)
 	{
-		_(cardList).each(fetchAndEmitCard);
+		if (!aborted) _(cardList).each(fetchAndEmitCard);
 	}
 
 	function fetchAndEmitCard(simpleCard)
 	{
-		fetchCard(simpleCard).then(emitCard);
+		var cardPromise = fetchCard(simpleCard);
+		cardPromise.then(emitCard);
+
+		if (cardPromise.request) requests.push(cardPromise.request);
 	}
 
 	function emitCard(card)
@@ -58,6 +66,12 @@ function search(query)
 		emitter.emit('card', card);
 		if (cards.length === list.length) emitter.emit('done', cards);
 	}
+
+	emitter.abort = function()
+	{
+		aborted = true;
+		_(requests).each(function(r) {r.abort();});
+	};
 
 	return emitter;
 }
@@ -80,7 +94,7 @@ function fetchList(query)
 	if (input.query)
 	{
 		var url = urlRoot+'?'+input.type+'='+encodeURIComponent(input.query);
-		request(url, function(error, response, body)
+		deferred.promise.request = request(url, function(error, response, body)
 		{
 			if (!error) cards = parseHtmlToCards(body);
 			deferred.resolve(cards);
@@ -102,7 +116,7 @@ function fetchCard(simpleCard)
 {
 	var deferred = q.defer();
 	if (!simpleCard || !simpleCard.url) fail('Invalid arguments to fetchCard');
-	request(simpleCard.url, function(error, response, body)
+	deferred.promise.request = request(simpleCard.url, function(error, response, body)
 	{
 		if (!error)
 		{

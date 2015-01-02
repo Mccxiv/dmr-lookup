@@ -14,9 +14,12 @@ var dm = require('dm-lookup');
 
 var search = dm.search('storm');
 
-search.on('list', console.log); //quick list, the cards lack some fields like image
-search.on('card', console.log); //full card info, fires for each result
-search.on('done', console.log); //complete list of full cards, slow!
+search.on('list', console.log); // quick list, the cards lack some fields like image
+search.on('card', console.log); // full card info, fires for each result
+search.on('done', console.log); // complete list of full cards, slow!
+
+// need to start a new search? no problem, let's cancel the current one
+search.abort()
 ```
 
 ### .on('list', fn)
@@ -74,7 +77,7 @@ search.on('done', console.log); //complete list of full cards, slow!
 ```
 
 ### Running tests
-Clone the repository from github, then:
+Clone the repository from Github, then:
 ```
 npm install
 npm run test

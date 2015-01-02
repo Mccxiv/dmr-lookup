@@ -25,6 +25,67 @@ describe('Public methods', function()
 		});
 	});
 
+	describe('.abort() tests', function()
+	{
+		this.timeout('30000');
+
+		it('should not emit "list" event after immediately calling abort', function(done)
+		{
+			var finished = false;
+			var s = dm.search('storm');
+			s.abort();
+
+			setTimeout(function() {if (!finished) done();}, 10000);
+
+			s.on('list', function()
+			{
+				finished = true;
+				done(new Error('This event should have never been fired'));
+			});
+		});
+
+		it('should not emit card events after immediately calling abort on "list"', function(done)
+		{
+			var s = dm.search('storm');
+			var finished = false;
+
+			s.on('list', function()
+			{
+				s.abort();
+
+				// if the event hasn't fired one after 10 sec assume success
+				setTimeout(function() {if (!finished) done();}, 10000);
+			});
+
+			s.on('card', function()
+			{
+				finished = true;
+				done(new Error('Card fired but it shouldnt have'));
+			});
+		});
+
+		it('should not emit card events after aborting 50ms into it', function(done)
+		{
+			var s = dm.search('storm');
+			var finished = false;
+
+			s.on('list', function()
+			{
+				// assumes scraping any individual card takes longer than 50 ms
+				setTimeout(s.abort, 50);
+
+				// if the event hasn't fired one after 10 sec assume the abort worked
+				setTimeout(function() {if (!finished) done();}, 10000);
+			});
+
+			s.on('card', function()
+			{
+				finished = true;
+				done(new Error('Card fired but it shouldnt have'));
+			});
+		});
+	});
+
 	describe('search("storm")', function ()
 	{
 		this.timeout('30000');
