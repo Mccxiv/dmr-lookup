@@ -1,7 +1,6 @@
-
 # Card data for Marvel Dice Masters™
 
-This module scrapes the web for the collectible dice game's card images. It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
+Scrapes the web for the collectible dice game's card images. It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
 ### Installation
 ```
