@@ -106,7 +106,7 @@ describe('Public methods', function()
 			});
 		});
 
-		it('The "card" event should return a valid card', function(done)
+		it('The card event should return a valid card', function(done)
 		{
 			var search = dm.search('storm');
 
@@ -114,7 +114,19 @@ describe('Public methods', function()
 			{
 				try
 				{
-					validateCard(card);
+					assert.ok(card, 'card exists');
+					assert.ok(card.name, 'name');
+					assert.ok(card.set, 'set');
+					assert.ok(card.number, 'number');
+					assert.ok(card.energy, 'energy');
+					assert.ok(card.affiliation, 'affiliation');
+					assert.ok(card.cost, 'cost');
+					assert.ok(card.title, 'title');
+					assert.ok(card.subtitle, 'subtitle');
+					assert.ok(validator.isURL(card.url), 'valid url');
+					assert.ok(validator.isURL(card.image), 'valid image url');
+					assert.ok(card.rarity, 'rarity');
+					assert.ok(card.maxDice, 'max dice');
 					done();
 				}
 				catch (e) {done(e)}
@@ -138,17 +150,24 @@ describe('Public methods', function()
 			});
 		});
 
-		it('should fire "card" 8 times', function(done)
+		it('should fire card x times, where x is length of simple list', function(done)
 		{
 			var search = dm.search('storm');
 			var cardCallCounter = 0;
+			var numberOfCards;
+
+			search.on('list', function(simpleCards)
+			{
+				numberOfCards = simpleCards.length;
+			});
+
 			search.on('card', function() {cardCallCounter++;});
 
 			search.on('done', function()
 			{
 				try
 				{
-					assert.strictEqual(cardCallCounter, 8);
+					assert.strictEqual(cardCallCounter, numberOfCards);
 					done();
 				}
 				catch (e) {done(e)}
@@ -156,20 +175,3 @@ describe('Public methods', function()
 		});
 	});
 });
-
-function validateCard(card)
-{
-	assert.ok(card);
-	assert.ok(card.name);
-	assert.ok(card.set);
-	assert.ok(card.number);
-	assert.ok(card.energy);
-	assert.ok(card.affiliation);
-	assert.ok(card.cost);
-	assert.ok(card.title);
-	assert.ok(card.subtitle);
-	assert.ok(validator.isURL(card.url));
-	assert.ok(validator.isURL(card.image));
-	assert.ok(card.rarity);
-	assert.ok(card.maxDice);
-}

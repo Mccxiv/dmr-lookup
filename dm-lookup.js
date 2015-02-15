@@ -172,8 +172,9 @@ function parseHtmlToCard(cardPageHtml)
 {
 	var $ = cheerio.load(cardPageHtml);
 	var table = $('.table-condensed');
+	var img = $('.attachment-full').attr('src') || '';
 	return {
-		image: $('.attachment-full').attr('src'),
+		image: img.indexOf('//') === 0? 'http:'+img : img,
 		rarity: table.find('tr:nth-child(3) td:nth-child(2)').text(),
 		maxDice: table.find('tr:nth-child(7) td:nth-child(2)').text()
 	};
