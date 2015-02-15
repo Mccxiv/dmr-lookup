@@ -1,6 +1,6 @@
 test/
+demo/
 .idea/
 dm-lookup.iml
 npm-debug.log
 .gitignore
-main.js
