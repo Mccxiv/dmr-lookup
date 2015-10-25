@@ -1,6 +1,7 @@
 # Card data for Marvel Dice Masters™
 
-Scrapes the web for the collectible dice game's card images. It is currently powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
+Scrapes the web for the collectible dice game's card images. It is currently 
+powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
 ### Installation
 ```
@@ -13,7 +14,8 @@ var dm = require('dm-lookup');
 
 var search = dm.search('storm');
 
-search.on('list', console.log); // quick list, the cards lack some fields like image
+search.on('list', console.log); // quick list, the cards lack some fields 
+like image
 search.on('card', console.log); // full card info, fires for each result
 search.on('done', console.log); // complete list of full cards, slow!
 
@@ -87,3 +89,5 @@ npm run test
 ### Considerations
 Making multiple requests to a Wordpress site is slow.
 It will have to do until someone provides a proper API. (｡･ω･｡)
+
+###### © 2015 Andrea Stella, ISC license.
