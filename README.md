@@ -3,6 +3,12 @@
 Scrapes the web for the collectible dice game's card images. It is currently 
 powered by [dicemastersrules.com](http://www.dicemastersrules.com/)
 
+### Warning: dicemastersrules down?
+Unfortunately, at the time of this writing 
+[dicemastersrules.com](http://www.dicemastersrules.com/) seems to be down. 
+This library depends on that website to function so unless it comes back 
+consider this package deprecated.
+
 ### Installation
 ```
 npm install --save dm-lookup
